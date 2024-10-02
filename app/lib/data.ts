@@ -86,7 +86,7 @@ export async function fetchCardData() {
 const ITEMS_PER_PAGE = 6;
 export async function fetchFilteredInvoices(
   query: string,
-  currentPage: number,
+  currentPage: number
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -96,7 +96,10 @@ export async function fetchFilteredInvoices(
         invoices.id,
         invoices.amount,
         invoices.date,
-        invoices.status,
+        CASE
+          WHEN invoices.status = 'pending' AND invoices.date < NOW() - INTERVAL '14 days' THEN 'overdue'
+          ELSE invoices.status
+        END AS status,
         customers.name,
         customers.email,
         customers.image_url

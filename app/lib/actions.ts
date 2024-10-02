@@ -15,7 +15,7 @@ const FormSchema = z.object({
   amount: z.coerce
     .number()
     .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
+  status: z.enum(['pending', 'paid', 'overdue', 'canceled'], {
     invalid_type_error: 'Please select an invoice status.',
   }),
   date: z.string(),
@@ -75,7 +75,7 @@ export async function createInvoice(prevState: State, formData: FormData) {
 export async function updateInvoice(
   id: string,
   prevState: State,
-  formData: FormData,
+  formData: FormData
 ) {
   const validatedFields = UpdateInvoice.safeParse({
     customerId: formData.get('customerId'),
@@ -92,6 +92,7 @@ export async function updateInvoice(
 
   const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
+  console.log('statuus', status);
 
   try {
     await sql`
@@ -111,7 +112,8 @@ export async function deleteInvoice(id: string) {
   // throw new Error('Failed to Delete Invoice');
 
   try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    await sql`UPDATE invoices SET status = 'canceled' WHERE id = ${id}`;
+
     revalidatePath('/dashboard/invoices');
     return { message: 'Deleted Invoice' };
   } catch (error) {
@@ -121,7 +123,7 @@ export async function deleteInvoice(id: string) {
 
 export async function authenticate(
   prevState: string | undefined,
-  formData: FormData,
+  formData: FormData
 ) {
   try {
     await signIn('credentials', formData);
