@@ -1,5 +1,7 @@
 import type { NextAuthConfig } from 'next-auth';
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+
 export const authConfig = {
   pages: {
     signIn: '/login',
@@ -16,7 +18,7 @@ export const authConfig = {
         if (isLoggedIn) return true;
         return false; // Redirect unauthenticated users to login page
       } else if (isLoggedIn) {
-        return Response.redirect(new URL('/dashboard', nextUrl));
+        return Response.redirect(new URL('/dashboard', baseUrl));
       }
       return true;
     },
